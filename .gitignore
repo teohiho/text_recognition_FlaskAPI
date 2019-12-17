@@ -1,0 +1,9 @@
+*.egg-info
+.idea/
+__pycache__/
+ve/
+
+AlphabetModel_FromHienDataset
+AlphabetModel_FromHienDataset_NN
+AlphabetModel_FromHienDataset_SVM
+
