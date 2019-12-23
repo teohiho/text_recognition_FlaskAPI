@@ -5,6 +5,7 @@ import io
 import cv2
 import numpy as np
 from pageSegmentation import pageSegmentation
+from pageSegmentation import pageSegmentationFourPoint
 from spellchecker import spellchecker 
 from io import BytesIO
 from flask import send_file
@@ -26,6 +27,51 @@ def predict():
     # imgSegmentation = Image.fromarray(imgSegmentation) #convert numpy image to image
     # processed_string = base64.b64encode(imgSegmentation) #convert image to base64
 
+    if(imgSegmentation != 'cut'):
+        pil_img = Image.fromarray(imgSegmentation)
+        buff = BytesIO()
+        pil_img.save(buff, format="JPEG")
+        processed_string = base64.b64encode(buff.getvalue()).decode("utf-8")
+
+        spellchecker()
+        textRecognition = readListToTextFile("result-spell-checked.txt", mode='r')
+
+        print("textRecognition:"+ str(textRecognition))
+        prediction={
+            "imgScan" : str(processed_string),
+            "textRecognition" : str(textRecognition)
+        }
+
+        #########
+        foReChe = open("result-spell-checked.txt", "r+")
+        deleteContentFile(foReChe)
+        foRe = open("result.txt", "r+")
+        deleteContentFile(foRe)
+        #########
+    elif(imgSegmentation == 'cut'):
+        prediction={
+            "imgScan" : '',
+            "textRecognition" : ''
+        }
+    
+    return jsonify({'prediction': prediction}), 201
+
+@app.route('/predictfourpoints', methods=['POST'])
+def predictfourpoints():
+    json_ = request.json
+    stringToRGB(json_[0]["uri"])
+    print("json_[0][x1]: " + str(json_[0]["x1"]))
+    print("json_[0][x2]: " + str(type(json_[0]["x2"])))
+    imgSegmentation = pageSegmentationFourPoint(
+        json_[0]["x1"], 
+        json_[0]["x2"],
+        json_[0]["x3"],
+        json_[0]["x4"],
+        json_[0]["y1"],
+        json_[0]["y2"],
+        json_[0]["y3"],
+        json_[0]["y4"],       
+    )
 
     pil_img = Image.fromarray(imgSegmentation)
     buff = BytesIO()
@@ -35,18 +81,22 @@ def predict():
     spellchecker()
     textRecognition = readListToTextFile("result-spell-checked.txt", mode='r')
 
-    print("textRecognition:"+ str(textRecognition))
+    # print("textRecognition:"+ str(textRecognition))
     prediction={
         "imgScan" : str(processed_string),
         "textRecognition" : str(textRecognition)
     }
 
+    #########
     foReChe = open("result-spell-checked.txt", "r+")
     deleteContentFile(foReChe)
     foRe = open("result.txt", "r+")
     deleteContentFile(foRe)
-
+    #########
+   
+    
     return jsonify({'prediction': prediction}), 201
+
 
 def get_request_data():
     return (

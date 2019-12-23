@@ -9,6 +9,9 @@ import numpy as np
 import tesserocr as tr
 from PIL import Image
 from scanFixed import scan
+from scanFixed import scanFromFourPoint
+
+
 from word import word
 
 
@@ -73,9 +76,22 @@ def pageSegmentation():
     east =  "frozen_east_text_detection.pb"
 
     imgSegmentation = imgScan(image)
-   
-    # text_detection(imgSegmentation, east, min_confidence = 0.5, width=320, height=320, )  
+    if (imgSegmentation != 'cut'):
+        # text_detection(imgSegmentation, east, min_confidence = 0.5, width=320, height=320, )  
+        word(imgSegmentation) 
+        
+        # cv2.waitKey(0)
+        return imgSegmentation
+    elif(imgSegmentation == 'cut'):
+        return imgSegmentation
+
+def pageSegmentationFourPoint( x1, x2, x3, x4, y1, y2, y3, y4):
+    image = "images/some_image.jpg"
+
+    imgSegmentation = cv2.imread(image)
+    # print(">>>>" + str(imgSegmentation.shape[:2]))
+    imgSegmentation = scanFromFourPoint(imgSegmentation, x1, x2, x3, x4, y1, y2, y3, y4)
+
     word(imgSegmentation) 
-    
-    # cv2.waitKey(0)
     return imgSegmentation
+

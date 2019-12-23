@@ -6,7 +6,8 @@ import re
 import collections
 from itertools import product
 
-SYSTEM_DICTIONARY = '/usr/share/dict/words'
+# SYSTEM_DICTIONARY = '/usr/share/dict/words'
+SYSTEM_DICTIONARY = './spellchecker/words_alpha.txt'
 vowels = set('aeiouy')
 alphabet = set('abcdefghijklmnopqrstuvwxyz')
 

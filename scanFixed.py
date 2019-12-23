@@ -66,8 +66,19 @@ def scan(image):
 		# can assume that we have found our screen
 		if len(approx) == 4 :
 			screenCnt = approx
+			# show the contour (outline) of the piece of paper
+			print(">>> screenCnt: " + str(screenCnt))
+			print("STEP 2: Find contours of paper")
+			cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
+			# cv2.imshow("Outline", image)
+			# cv2.waitKey(0)
+			# cv2.destroyAllWindows()
+			scanImage = scanFromPoint(screenCnt.reshape(point, 2) * ratio, orig, 650)
+
+			# cv2.waitKey(0)
+			return scanImage
 			break
-		else:
+		
 			# imDraw = drawROI(orig)
 			# image = imDraw
 			# orig = image.copy()
@@ -105,49 +116,70 @@ def scan(image):
 
 			# ######### DRAW ROI BY 4 POINTS #####
 
-			orig2 = image.copy()
-			fourpoint = []
-			# mouse callback function
-			
-			def draw_circle(event,x,y,flags,param):
-				
-				if event == cv2.EVENT_LBUTTONDBLCLK:
-					cv2.circle(orig2,(x,y),7,(255,0,0),-1)
-					
-					cv2.putText(orig2, "(" + str(x) + "," +str(y) + ")", (int(x + 0.1),int(y + 0.1)) , cv2.FONT_HERSHEY_SIMPLEX ,  0.7, (255, 0, 0) , 2, cv2.LINE_AA) 
-				
-					print("(x , y) = " + "(" + str(x) + " , "  + str(y) + ")")
-					
-					fourpoint.append([[x,y]])
-					
-			cv2.namedWindow('DRAW')
-			cv2.setMouseCallback('DRAW',draw_circle)
-			
-
-			while(1):
-				cv2.imshow('DRAW',orig2)
+	# orig2 = image.copy()
+	# fourpoint = []
+	# # mouse callback function
 	
+	# def draw_circle(event,x,y,flags,param):
+		
+	# 	if event == cv2.EVENT_LBUTTONDBLCLK:
+	# 		cv2.circle(orig2,(x,y),7,(255,0,0),-1)
 			
-				if cv2.waitKey(20) & 0xFF == 27:
-					break
-				# cv2.waitKey(0)
-			cv2.destroyAllWindows()
-
-			screenCnt = np.array(fourpoint, np.int32)
-			break
+	# 		cv2.putText(orig2, "(" + str(x) + "," +str(y) + ")", (int(x + 0.1),int(y + 0.1)) , cv2.FONT_HERSHEY_SIMPLEX ,  0.7, (255, 0, 0) , 2, cv2.LINE_AA) 
+		
+	# 		print("(x , y) = " + "(" + str(x) + " , "  + str(y) + ")")
+			
+	# 		fourpoint.append([[x,y]])
+			
+	# cv2.namedWindow('DRAW')
+	# cv2.setMouseCallback('DRAW',draw_circle)
 	
-	# show the contour (outline) of the piece of paper
-	print(">>> screenCnt: " + str(screenCnt))
-	print("STEP 2: Find contours of paper")
-	cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
-	# cv2.imshow("Outline", image)
-	# cv2.waitKey(0)
+
+	# while(1):
+	# 	cv2.imshow('DRAW',orig2)
+
+	
+	# 	if cv2.waitKey(20) & 0xFF == 27:
+	# 		break
+	# 	# cv2.waitKey(0)
 	# cv2.destroyAllWindows()
-	scanImage = scanFromPoint(screenCnt.reshape(point, 2) * ratio, orig, 650)
 
-	# cv2.waitKey(0)
-	return scanImage
+	# screenCnt = np.array(fourpoint, np.int32)
 	
+	# print(">>> screenCnt: " + str(screenCnt))
+	# print("STEP 2: Find contours of paper")
+	# cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
+	# # cv2.imshow("Outline", image)
+	# # cv2.waitKey(0)
+	# # cv2.destroyAllWindows()
+	# scanImage = scanFromPoint(screenCnt.reshape(point, 2) * ratio, orig, 650)
+
+	# # cv2.waitKey(0)
+	return 'cut'
+	
+def scanFromFourPoint(image, x1, x2, x3, x4, y1, y2, y3, y4):
+	image_file = Image.fromarray(image)
+	image_file = ImageEnhance.Contrast(image_file).enhance(3.5)
+	image = np.array(image)
+	point = 4
+	ratio = image.shape[0] / 500.0
+	orig = image.copy()
+	# image = imutils.resize(image, height = 500)
+	orig2 = image.copy()
+	
+	fourpoint = [
+		[[int(x1) , int(y1)]],
+		[[int(x2) ,int(y2)]],
+		[[int(x3) , int(y3)]],
+		[[int(x4) , int(y4)]],
+	]
+
+	screenCnt = np.array(fourpoint, np.int32)
+
+	cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
+	scanImage = scanFromPoint(screenCnt.reshape(point, 2) * ratio, orig, 650)
+	return scanImage
+
 def scanFromPoint(pts, image, height):
 	# apply the four point transform to obtain a top-down
 	# view of the original image
